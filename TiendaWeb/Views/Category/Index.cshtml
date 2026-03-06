@@ -7,7 +7,7 @@
 
 @model List<Category>
 
-@if (ViewBag.ConnectionMessage != null)
+@* @if (ViewBag.ConnectionMessage != null)
 {
     <div class="alert @(ViewBag.ConnectionMessage.ToString().Contains("✅") ? "alert-success" : "alert-danger")">
         <h5>Estado de conexión:</h5>
@@ -18,7 +18,7 @@
             <p><strong>Servidor:</strong> @ViewBag.ServerName</p>
         }
     </div>
-}
+} *@
 
 <div class="card shadow border-0 mt-4">
     <div class="card-header bg-secondary bg-gradient m-lg-0 py-3">

@@ -446,31 +446,45 @@ INSERT INTO Category (Name, DisplayOrder) VALUES
 
         // <param name="Id></param>
 
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
         public IActionResult Create(Category obj)
         {
+            // Validación personalizada
             if (obj.Name == obj.DisplayOrder.ToString())
             {
                 ModelState.AddModelError("Name", "The DisplayOrder cannot exactly match the name.");
             }
 
-            //if (obj.Name != null && obj.Name.ToLower() == "test")
-            //{
-            //    ModelState.AddModelError("", "Test is an invalid value");
-            //}
-
             if (ModelState.IsValid)
             {
-                _db.Categories.Add(obj);
-                _db.SaveChanges();
-                TempData["success"] = "Category created successfully";
-                return RedirectToAction("index");
+                try
+                {
+                    _db.Categories.Add(obj);
+                    _db.SaveChanges();
+                    TempData["success"] = "Category created successfully";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    // Esto te dará el mensaje detallado de SQL
+                    var innerMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                    ModelState.AddModelError("", "Error detallado: " + innerMessage);
+                    return View(obj);
+                }
             }
-            return View();
+
+            // ¡IMPORTANTE!: Pasa 'obj' de regreso para que no se pierdan los datos escritos
+            return View(obj);
         }
 
         public IActionResult Edit(int? Id)
         {
-            if(Id  == null || Id ==0)
+            if (Id == null || Id == 0)
             {
                 return NotFound();
             }
@@ -478,12 +492,10 @@ INSERT INTO Category (Name, DisplayOrder) VALUES
             Category? categoryFromDb = _db.Categories.Find(Id);
             if (categoryFromDb == null)
             {
-                return NotFound() ;
+                return NotFound();
             }
-            return View();
-
+            return View(categoryFromDb);
         }
-
         [HttpPost]
         public IActionResult Edit(Category obj)
         {
@@ -491,12 +503,45 @@ INSERT INTO Category (Name, DisplayOrder) VALUES
             {
                 _db.Categories.Update(obj);
                 _db.SaveChanges();
-                TempData["succes"] = "Category updated succeessfully";
-                return RedirectToAction("index");
+                TempData["success"] = "Category updated successfully"; // Corregido el texto
+                return RedirectToAction("Index");
             }
-            return View();
+            // Si hay error, regresa el objeto a la vista
+            return View(obj);
         }
 
+        public IActionResult Delete(int? Id)
+        {
+            if (Id == null || Id == 0)
+            {
+                return NotFound();
+            }
+
+            Category? categoryFromDb = _db.Categories.Find(Id);
+            if (categoryFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(categoryFromDb);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeletePost(int? Id)
+        {
+            Category? obj = _db.Categories.Find(Id);
+            if (obj == null)
+            {
+                {
+                    return NotFound();
+                }
+            }
+
+            _db.Categories.Remove(obj);
+            _db.SaveChanges();
+            TempData["success"] = "Category deleted successfully";
+            return RedirectToAction("Index");
+        }
 
 
 
